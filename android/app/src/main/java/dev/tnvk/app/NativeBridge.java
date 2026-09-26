@@ -5,6 +5,16 @@ public final class NativeBridge {
 
     private NativeBridge() {}
 
+    private static boolean loaded;
+
+    /** Load tnvk-jni once; safe to call from MainActivity.onCreate. */
+    public static synchronized void load() {
+        if (!loaded) {
+            System.loadLibrary("tnvk-jni");
+            loaded = true;
+        }
+    }
+
     /** Human-readable GUI readiness, e.g. "ready Mali-G68" or a reason. */
     public static native String guiReady();
 
