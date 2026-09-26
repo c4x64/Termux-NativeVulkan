@@ -6,9 +6,11 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -78,7 +80,42 @@ public final class TermView extends LinearLayout {
 
         send.setOnClickListener(v -> submit(input.getText().toString()));
 
-        setFocusableInTouchMode(true);
+        // Soft keyboard: the container must NOT steal focus (it would bind
+        // the dummy IME connection and the keyboard would never arrive).
+        // Taps anywhere in the terminal focus the real input instead.
+        setFocusable(false);
+        setFocusableInTouchMode(false);
+        input.setFocusable(true);
+        input.setFocusableInTouchMode(true);
+        input.setShowSoftInputOnFocus(true);
+        input.setOnFocusChangeListener((v, has) -> {
+            if (has) {
+                showKeyboard();
+            }
+        });
+        OnClickListener focusTap = v -> focusInput();
+        setOnClickListener(focusTap);
+        output.setOnClickListener(focusTap);
+        if (scroll != null) {
+            scroll.setOnClickListener(focusTap);
+        }
+    }
+
+    /** Focus the input line and raise the soft keyboard. */
+    public void focusInput() {
+        input.requestFocus();
+        showKeyboard();
+    }
+
+    private void showKeyboard() {
+        Context ctx = getContext();
+        if (ctx == null) {
+            return;
+        }
+        Object svc = ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (svc instanceof InputMethodManager) {
+            ((InputMethodManager) svc).showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+        }
     }
 
     /** Spawn the shell; show the txnb hint on first launch. */

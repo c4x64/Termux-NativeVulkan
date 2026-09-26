@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Fullscreen distro GUI first: Vulkan surface fills the screen from launch,
+     status floats on top, terminal is a bottom overlay toggled by TERM. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@drawable/bg_root"
-    android:padding="12dp">
+    android:background="@drawable/bg_root">
 
-    <!-- Status header: readiness dot + titles + pill -->
+    <!-- Distro GUI surface: fullscreen from start -->
+    <dev.tnvk.app.TnvkView
+        android:id="@+id/gui_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Floating status bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="top"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingBottom="10dp">
+        android:padding="12dp">
 
         <View
             android:id="@+id/status_dot"
@@ -38,7 +45,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="native vulkan :: terminal"
+                android:text="distro gui :: vulkan surface"
                 style="@style/Tnvk.HeaderSubtitle" />
         </LinearLayout>
 
@@ -50,54 +57,22 @@
             style="@style/Tnvk.StatusPill" />
     </LinearLayout>
 
-    <!-- GUI surface frame -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="3"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="VULKAN SURFACE"
-            android:paddingBottom="4dp"
-            style="@style/Tnvk.GuiLabel" />
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_gui_frame"
-            android:padding="2dp">
-
-            <dev.tnvk.app.TnvkView
-                android:id="@+id/gui_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </FrameLayout>
-    </LinearLayout>
-
-    <!-- Pink glow divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/divider_glow" />
-
-    <!-- Terminal label + docked CLI pane -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TERMINAL"
-        android:paddingBottom="4dp"
-        style="@style/Tnvk.GuiLabel" />
-
+    <!-- Terminal overlay: hidden until TERM toggles it -->
     <dev.tnvk.app.TermView
         android:id="@+id/term_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2" />
+        android:layout_height="340dp"
+        android:layout_gravity="bottom"
+        android:visibility="gone" />
 
-</LinearLayout>
+    <!-- Terminal toggle -->
+    <Button
+        android:id="@+id/term_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="12dp"
+        android:text="TERM"
+        style="@style/Tnvk.SendButton" />
+
+</FrameLayout>

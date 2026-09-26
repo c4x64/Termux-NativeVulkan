@@ -3,12 +3,13 @@ package dev.tnvk.app;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 /**
- * TNVK host activity: status header on top, Vulkan GUI surface in the
- * middle, CLI terminal docked below. Composition comes from
- * {@code res/layout/activity_main.xml} in the Zero Two midnight theme.
+ * TNVK host activity: fullscreen distro GUI (Vulkan surface) from launch,
+ * floating status header, terminal as a bottom overlay toggled by TERM.
+ * Composition comes from {@code res/layout/activity_main.xml}.
  */
 public class MainActivity extends Activity {
 
@@ -16,6 +17,7 @@ public class MainActivity extends Activity {
     private TermView termView;
     private View statusDot;
     private TextView statusPill;
+    private Button termToggle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +30,8 @@ public class MainActivity extends Activity {
         termView = findViewById(R.id.term_view);
         statusDot = findViewById(R.id.status_dot);
         statusPill = findViewById(R.id.status_pill);
+        termToggle = findViewById(R.id.term_toggle);
+        termToggle.setOnClickListener(v -> toggleTerminal());
 
         // Runtime GUI check surfaces in the header pill and the CLI pane,
         // like a distro MOTD.
@@ -63,8 +67,17 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void updateStatus(boolean ready, String probe) {
-        if (statusDot != null) {
+    /** TERM button: overlay the distro shell without leaving the GUI. */
+    private void toggleTerminal() {
+        if (termView.getVisibility() == View.VISIBLE) {
+            termView.setVisibility(View.GONE);
+        } else {
+            termView.setVisibility(View.VISIBLE);
+            termView.focusInput();
+        }
+    }
+
+    private void updateStatus(boolean ready, String probe) {        if (statusDot != null) {
             statusDot.setBackgroundResource(ready ? R.drawable.dot_ready : R.drawable.dot_idle);
         }
         if (statusPill != null) {

@@ -23,8 +23,9 @@ static void usage(const char *a){
         "  %s gui                 check runtime GUI readiness (system Vulkan HW)\n"
         "  %s term [shell]        exec shell for the in-GUI terminal (default $SHELL or bash)\n"
         "  %s install <pkgs...>   install WM/tools like a distro (pkg passthrough)\n"
-        "  %s run-wm <wm...>      launch WM under native-GUI env (default ziro-wm)\n",
-        TXNB_VERSION, a, a, a, a, a);
+        "  %s run-wm <wm...>      launch WM under native-GUI env (default ziro-wm)\n"
+        "  %s distro {setup|boot} full distro userland (debian) under the GUI\n",
+        TXNB_VERSION, a, a, a, a, a, a);
 }
 
 static int cmd_version(void){
@@ -88,6 +89,25 @@ static int cmd_run_wm(int argc, char **argv){
     perror("txnb run-wm: exec failed"); return 1;
 }
 
+/* Full distro userland under the GUI: debian via proot-distro.
+ * setup provisions it, boot drops into it (its shell becomes the
+ * terminal overlay's shell, its WM renders to the Vulkan surface). */
+static int cmd_distro(int argc, char **argv){
+    if(argc<1){ fprintf(stderr,"usage: txnb distro {setup|boot}\n"); return 2; }
+    if(!strcmp(argv[0],"setup")){
+        int rc=system("pkg install -y proot-distro && proot-distro install debian");
+        return rc?1:0;
+    }
+    if(!strcmp(argv[0],"boot")){
+        setenv("TNVK_DISTRO","debian",1);
+        setenv("TNVK_HW","1",1);
+        execlp("proot-distro","proot-distro","login","debian",(char*)0);
+        perror("txnb distro boot: proot-distro not found (run txnb distro setup first)");
+        return 1;
+    }
+    fprintf(stderr,"usage: txnb distro {setup|boot}\n"); return 2;
+}
+
 int main(int argc, char **argv){
     if(argc<2){ usage(argv[0]); return 2; }
     if(!strcmp(argv[1],"--version")||!strcmp(argv[1],"version")) return cmd_version();
@@ -95,5 +115,6 @@ int main(int argc, char **argv){
     if(!strcmp(argv[1],"term")) return cmd_term(argc-2,argv+2);
     if(!strcmp(argv[1],"install")) return cmd_install(argc-2,argv+2);
     if(!strcmp(argv[1],"run-wm")) return cmd_run_wm(argc-2,argv+2);
+    if(!strcmp(argv[1],"distro")) return cmd_distro(argc-2,argv+2);
     usage(argv[0]); return 2;
 }
