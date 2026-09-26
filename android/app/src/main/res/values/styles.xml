@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Framework-only theme (no androidx). Parent is the platform Material theme. -->
+    <!-- Base parent required by dotted Tnvk.* styles. -->
+    <style name="Tnvk" />
     <style name="TnvkTheme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
         <item name="android:windowBackground">@color/zero_midnight</item>
         <item name="android:colorBackground">@color/zero_midnight</item>
