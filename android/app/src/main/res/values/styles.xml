@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Framework-only theme (no androidx). Parent is the platform Material theme. -->
+    <style name="TnvkTheme" parent="@android:style/Theme.Material.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@color/zero_midnight</item>
+        <item name="android:colorBackground">@color/zero_midnight</item>
+        <item name="android:colorAccent">@color/zero_pink</item>
+        <item name="android:textColorPrimary">@color/zero_sakura</item>
+        <item name="android:textColorSecondary">@color/zero_muted</item>
+        <item name="android:statusBarColor">@color/zero_midnight</item>
+        <item name="android:navigationBarColor">@color/zero_midnight</item>
+        <item name="android:editTextStyle">@style/Tnvk.InputField</item>
+    </style>
+
+    <style name="Tnvk.HeaderTitle">
+        <item name="android:textColor">@color/zero_sakura</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.08</item>
+    </style>
+
+    <style name="Tnvk.HeaderSubtitle">
+        <item name="android:textColor">@color/zero_muted</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:letterSpacing">0.12</item>
+    </style>
+
+    <style name="Tnvk.StatusPill">
+        <item name="android:textColor">@color/zero_sakura</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.1</item>
+        <item name="android:background">@drawable/bg_pill</item>
+        <item name="android:paddingLeft">10dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingBottom">6dp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Tnvk.GuiLabel">
+        <item name="android:textColor">@color/zero_muted</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:letterSpacing">0.18</item>
+    </style>
+
+    <style name="Tnvk.TerminalOutput">
+        <item name="android:textColor">@color/zero_sakura</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:lineSpacingExtra">3dp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Tnvk.InputField">
+        <item name="android:textColor">@color/zero_sakura</item>
+        <item name="android:textColorHint">@color/zero_hint</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:background">@drawable/bg_input</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="Tnvk.SendButton">
+        <item name="android:textColor">@color/zero_sakura</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@drawable/bg_send</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:minHeight">0dp</item>
+        <item name="android:paddingLeft">14dp</item>
+        <item name="android:paddingRight">14dp</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+</resources>

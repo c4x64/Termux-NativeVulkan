@@ -2,53 +2,94 @@ package dev.tnvk.app;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
+import android.view.View;
+import android.widget.TextView;
 
-/** TNVK host activity: GUI surface on top, CLI terminal docked below. */
+/**
+ * TNVK host activity: status header on top, Vulkan GUI surface in the
+ * middle, CLI terminal docked below. Composition comes from
+ * {@code res/layout/activity_main.xml} in the Zero Two midnight theme.
+ */
 public class MainActivity extends Activity {
 
     private TnvkView guiView;
     private TermView termView;
+    private View statusDot;
+    private TextView statusPill;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         NativeBridge.load();
+        setContentView(R.layout.activity_main);
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
+        guiView = findViewById(R.id.gui_view);
+        termView = findViewById(R.id.term_view);
+        statusDot = findViewById(R.id.status_dot);
+        statusPill = findViewById(R.id.status_pill);
 
-        guiView = new TnvkView(this);
-        termView = new TermView(this);
+        // Runtime GUI check surfaces in the header pill and the CLI pane,
+        // like a distro MOTD.
+        String probe = probeGuiReady();
+        boolean ready = probe != null && probe.startsWith("ready");
+        updateStatus(ready, probe);
 
-        LinearLayout.LayoutParams guiParams =
-                new LinearLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT, 0, 3f);
-        LinearLayout.LayoutParams termParams =
-                new LinearLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT, 0, 2f);
-
-        root.addView(guiView, guiParams);
-        root.addView(termView, termParams);
-        setContentView(root);
-
-        // Runtime GUI check surfaces in the CLI pane, like a distro MOTD.
-        String probe = NativeBridge.guiReady();
-        termView.print("tnvk app — " + probe + "\n");
+        termView.print("tnvk app \u2014 " + probe + "\n");
         termView.print("CLI inside GUI. Try: txnb install <wm>  |  txnb run-wm ziro-wm\n");
+
+        termView.openShell(probeDefaultShell());
+
+        if (ready) {
+            guiView.start();
+        }
+    }
+
+    private String probeGuiReady() {
+        try {
+            String probe = NativeBridge.guiReady();
+            return probe != null ? probe : "missing: empty probe";
+        } catch (UnsatisfiedLinkError e) {
+            return "missing: " + e.getMessage();
+        }
+    }
+
+    private String probeDefaultShell() {
+        try {
+            String shell = NativeBridge.defaultShell();
+            return (shell == null || shell.isEmpty()) ? "/system/bin/sh" : shell;
+        } catch (UnsatisfiedLinkError e) {
+            return "/system/bin/sh";
+        }
+    }
+
+    private void updateStatus(boolean ready, String probe) {
+        if (statusDot != null) {
+            statusDot.setBackgroundResource(ready ? R.drawable.dot_ready : R.drawable.dot_idle);
+        }
+        if (statusPill != null) {
+            if (ready) {
+                String shortName = probe.length() > 22 ? probe.substring(0, 22) + "\u2026" : probe;
+                statusPill.setText(shortName.toUpperCase());
+            } else {
+                statusPill.setText("STANDBY");
+            }
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        guiView.onResume();
+        if (guiView != null) {
+            guiView.onResume();
+        }
     }
 
     @Override
     protected void onPause() {
-        guiView.onPause();
+        if (guiView != null) {
+            guiView.onPause();
+        }
         super.onPause();
     }
 }

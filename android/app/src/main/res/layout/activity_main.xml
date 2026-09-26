@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_root"
+    android:padding="12dp">
+
+    <!-- Status header: readiness dot + titles + pill -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="10dp">
+
+        <View
+            android:id="@+id/status_dot"
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:background="@drawable/dot_idle"
+            android:contentDescription="GUI status indicator" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ZERO TWO // TNVK"
+                style="@style/Tnvk.HeaderTitle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="native vulkan :: terminal"
+                style="@style/Tnvk.HeaderSubtitle" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/status_pill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CHECKING"
+            style="@style/Tnvk.StatusPill" />
+    </LinearLayout>
+
+    <!-- GUI surface frame -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="VULKAN SURFACE"
+            android:paddingBottom="4dp"
+            style="@style/Tnvk.GuiLabel" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_gui_frame"
+            android:padding="2dp">
+
+            <dev.tnvk.app.TnvkView
+                android:id="@+id/gui_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+    </LinearLayout>
+
+    <!-- Pink glow divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/divider_glow" />
+
+    <!-- Terminal label + docked CLI pane -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TERMINAL"
+        android:paddingBottom="4dp"
+        style="@style/Tnvk.GuiLabel" />
+
+    <dev.tnvk.app.TermView
+        android:id="@+id/term_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2" />
+
+</LinearLayout>

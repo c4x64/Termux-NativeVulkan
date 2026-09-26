@@ -1,6 +1,7 @@
 package dev.tnvk.app;
 
 import android.content.Context;
+import android.util.AttributeSet;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -15,6 +16,20 @@ public final class TnvkView extends SurfaceView implements SurfaceHolder.Callbac
 
     public TnvkView(Context ctx) {
         super(ctx);
+        init();
+    }
+
+    public TnvkView(Context ctx, AttributeSet attrs) {
+        super(ctx, attrs);
+        init();
+    }
+
+    public TnvkView(Context ctx, AttributeSet attrs, int defStyleAttr) {
+        super(ctx, attrs, defStyleAttr);
+        init();
+    }
+
+    private void init() {
         getHolder().addCallback(this);
         setFocusable(true);
         setFocusableInTouchMode(true);

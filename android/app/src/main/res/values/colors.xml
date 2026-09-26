@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Zero Two midnight terminal palette -->
+    <color name="zero_midnight">#0D0716</color>
+    <color name="zero_panel">#1A0F24</color>
+    <color name="zero_panel_hi">#251536</color>
+    <color name="zero_terminal">#140B1E</color>
+    <color name="zero_sakura">#FFD7E6</color>
+    <color name="zero_pink">#FF2E88</color>
+    <color name="zero_pink_hi">#FF6EB4</color>
+    <color name="zero_pink_dark">#C2175F</color>
+    <color name="zero_line">#3A1D2E</color>
+    <color name="zero_muted">#9A7A8C</color>
+    <color name="zero_hint">#6E4A5E</color>
+    <color name="zero_idle_dot">#5A3348</color>
+    <color name="zero_input_bg">#1A0F24</color>
+</resources>

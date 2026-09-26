@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ScrollView
+        android:id="@+id/term_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_terminal"
+        android:clipToPadding="true"
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical"
+        android:scrollbarThumbVertical="@drawable/scroll_thumb"
+        android:scrollbarSize="4dp"
+        android:scrollbarFadeDuration="0">
+
+        <TextView
+            android:id="@+id/term_output"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="120dp"
+            android:padding="12dp"
+            android:scrollbars="vertical"
+            android:textIsSelectable="true"
+            style="@style/Tnvk.TerminalOutput" />
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp">
+
+        <EditText
+            android:id="@+id/term_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginRight="8dp"
+            android:hint="txnb install &lt;wm&gt;  |  txnb run-wm ziro-wm"
+            android:imeOptions="actionDone"
+            android:inputType="text"
+            android:maxLines="1"
+            android:singleLine="true"
+            style="@style/Tnvk.InputField" />
+
+        <Button
+            android:id="@+id/term_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="0dp"
+            android:minHeight="0dp"
+            android:text="SEND"
+            android:contentDescription="Send command"
+            style="@style/Tnvk.SendButton" />
+    </LinearLayout>
+
+</merge>

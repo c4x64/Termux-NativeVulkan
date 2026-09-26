@@ -1,79 +1,110 @@
 package dev.tnvk.app;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.method.ScrollingMovementMethod;
+import android.util.AttributeSet;
 import android.view.KeyEvent;
-import android.view.View;
+import android.view.LayoutInflater;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import java.io.FileDescriptor;
 
 /**
  * CLI UI inside the GUI: output pane + input line wired to a pty whose
  * slave runs `txnb term`. Distro-style installs go through
- * `txnb install <wm>` so WMs/tools land like on normal Linux.
+ * `txnb install &lt;wm&gt;` so WMs/tools land like on normal Linux.
+ *
+ * <p>Visuals come from {@code res/layout/view_term.xml} plus the Zero Two
+ * midnight/sakura theme: padded monospace output pane with a pink
+ * scrollbar, and a styled input bar whose SEND button shares the exact
+ * Enter-key submit path.
  */
 public final class TermView extends LinearLayout {
 
-    private final TextView output;
-    private final EditText input;
+    private TextView output;
+    private EditText input;
+    private ScrollView scroll;
+    private Button send;
     private TermSession session;
 
     public TermView(Context ctx) {
         super(ctx);
+        init(ctx);
+    }
+
+    public TermView(Context ctx, AttributeSet attrs) {
+        super(ctx, attrs);
+        init(ctx);
+    }
+
+    public TermView(Context ctx, AttributeSet attrs, int defStyleAttr) {
+        super(ctx, attrs, defStyleAttr);
+        init(ctx);
+    }
+
+    private void init(Context ctx) {
         setOrientation(VERTICAL);
-        setBackgroundColor(Color.parseColor("#0d0716"));
+        LayoutInflater.from(ctx).inflate(R.layout.view_term, this, true);
 
-        output = new TextView(ctx);
-        output.setTextColor(Color.parseColor("#ffd7e6"));
-        output.setTextSize(12f);
+        scroll = findViewById(R.id.term_scroll);
+        output = findViewById(R.id.term_output);
+        input = findViewById(R.id.term_input);
+        send = findViewById(R.id.term_send);
+
+        output.setTypeface(Typeface.MONOSPACE);
         output.setMovementMethod(new ScrollingMovementMethod());
-        ScrollView scroll = new ScrollView(ctx);
-        scroll.addView(output);
-        LinearLayout.LayoutParams scrollParams =
-                new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, 0, 1f);
-        addView(scroll, scrollParams);
 
-        input = new EditText(ctx);
-        input.setHint("txnb install <wm>  |  txnb run-wm ziro-wm");
-        input.setTextColor(Color.parseColor("#ffd7e6"));
-        input.setHintTextColor(Color.parseColor("#3a1d2e"));
-        input.setBackgroundColor(Color.parseColor("#1a0f24"));
+        input.setTypeface(Typeface.MONOSPACE);
         input.setSingleLine(true);
+        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
         input.setOnEditorActionListener((v, actionId, event) -> {
-            if (event != null && event.getAction() == KeyEvent.ACTION_DOWN) {
+            boolean enterKey = event != null
+                    && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    && event.getAction() == KeyEvent.ACTION_DOWN;
+            if (actionId == EditorInfo.IME_ACTION_DONE
+                    || actionId == EditorInfo.IME_ACTION_SEND
+                    || enterKey) {
                 submit(input.getText().toString());
                 return true;
             }
             return false;
         });
-        addView(input, new LinearLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        send.setOnClickListener(v -> submit(input.getText().toString()));
 
         setFocusableInTouchMode(true);
     }
 
     /** Spawn the shell; show the txnb hint on first launch. */
     public void openShell(String shell) {
-        session = new TermSession(shell, this::append);
+        String target = (shell == null || shell.isEmpty()) ? "/system/bin/sh" : shell;
+        session = new TermSession(target, this::append);
         session.start();
     }
 
-    /** Distro-style entry: `txnb install <wm>` handled natively. */
+    /** Distro-style entry: `txnb install &lt;wm&gt;` handled natively. */
     private void submit(String line) {
+        if (line == null) {
+            line = "";
+        }
         append("$ " + line + "\n");
         input.setText("");
         String t = line.trim();
         if (t.startsWith("txnb install ")) {
-            String[] pkgs = t.substring("txnb install ".length()).trim().split("\\s+");
-            int rc = NativeBridge.installPackages(pkgs);
-            append("[txnb install] exit=" + rc + "\n");
+            String rest = t.substring("txnb install ".length()).trim();
+            if (!rest.isEmpty()) {
+                String[] pkgs = rest.split("\\s+");
+                int rc = NativeBridge.installPackages(pkgs);
+                append("[txnb install] exit=" + rc + "\n");
+            } else {
+                append("usage: txnb install <wm> [tools...]\n");
+            }
             return;
         }
         if (session != null) {
@@ -86,11 +117,13 @@ public final class TermView extends LinearLayout {
     }
 
     private void append(final String s) {
+        if (s == null || s.isEmpty()) {
+            return;
+        }
         post(() -> {
             output.append(s);
-            View parent = (View) output.getParent();
-            if (parent instanceof ScrollView) {
-                ((ScrollView) parent).fullScroll(FOCUS_DOWN);
+            if (scroll != null) {
+                scroll.post(() -> scroll.fullScroll(FOCUS_DOWN));
             }
         });
     }
@@ -107,8 +140,7 @@ public final class TermView extends LinearLayout {
     private static final class TermSession extends Thread {
         private final String shell;
         private final Sink sink;
-        private FileDescriptor master;
-        private int writer = -1;
+        private volatile int writer = -1;
 
         interface Sink {
             void onOutput(String s);
@@ -127,9 +159,11 @@ public final class TermView extends LinearLayout {
                 sink.onOutput("[term] pty failed\n");
                 return;
             }
+            writer = fds[1];
+            int reader = fds[0];
             byte[] buf = new byte[4096];
             for (;;) {
-                int n = NativePty.read(fds[0], buf);
+                int n = NativePty.read(reader, buf);
                 if (n <= 0) {
                     sink.onOutput("\n[term] shell exited\n");
                     return;
@@ -139,8 +173,9 @@ public final class TermView extends LinearLayout {
         }
 
         void write(String s) {
-            if (writer >= 0) {
-                NativePty.write(writer, s.getBytes());
+            int fd = writer;
+            if (fd >= 0 && s != null) {
+                NativePty.write(fd, s.getBytes());
             }
         }
     }
