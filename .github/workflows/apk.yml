@@ -1,0 +1,30 @@
+name: apk
+on:
+  push:
+    paths:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
+  pull_request:
+    paths:
+      - 'android/**'
+jobs:
+  debug-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install NDK + CMake
+        run: sdkmanager "ndk;27.0.12077973" "cmake;3.22.1"
+      - uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: 8.7
+          build-root-directory: android
+          arguments: :app:assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tnvk-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
